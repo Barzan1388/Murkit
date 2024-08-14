@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Counter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: black;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .main-circle {
+            width: 128px;
+            height: 128px;
+            border-radius: 50%;
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin: 20px auto;
+            transition: transform 0.3s;
+        }
+        
+        .main-circle:active {
+            transform: scale(1.1);
+        }
+        
+        .glass-square {
+            width: 64px;
+            height: 64px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .glass-square:active {
+            transform: scale(1.1);
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .dot {
+            position: absolute;
+            border-radius: 50%;
+            background-color: white;
+            opacity: 0.2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="clickDisplay"></div>
+        <div id="mainCircle" class="main-circle">OFF</div>
+        <div id="counterDisplay"></div>
+        <div>
+            <div class="glass-square">
+                <span data-lucide="home"></span>
+                <span style="font-size: 12px;">Home</span>
+            </div>
+            <div class="glass-square">
+                <span data-lucide="clipboard-list"></span>
+                <span style="font-size: 12px;">Tasks</span>
+            </div>
+            <div class="glass-square">
+                <span data-lucide="users"></span>
+                <span style="font-size: 12px;">Friend</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let clicks = parseInt(localStorage.getItem('clicks')) || 0;
+        let remaining = parseInt(localStorage.getItem('remaining')) || 500;
+        let autoCounter = parseInt(localStorage.getItem('autoCounter')) || 0;
+
+        const clickDisplay = document.getElementById('clickDisplay');
+        const mainCircle = document.getElementById('mainCircle');
+        const counterDisplay = document.getElementById('counterDisplay');
+
+        function updateDisplay() {
+            clickDisplay.innerHTML = `<span data-lucide="dollar-sign"></span> ${clicks}`;
+            counterDisplay.textContent = remaining > 0 ? `${remaining}/500` : autoCounter;
+            localStorage.setItem('clicks', clicks);
+            localStorage.setItem('remaining', remaining);
+            localStorage.setItem('autoCounter', autoCounter);
+            lucide.createIcons();
+        }
+
+        mainCircle.addEventListener('click', () => {
+            if (remaining > 0) {
+                clicks++;
+                remaining--;
+                mainCircle.textContent = '+1';
+                setTimeout(() => mainCircle.textContent = 'OFF', 300);
+                updateDisplay();
+            }
+        });
+
+        setInterval(() => {
+            if (remaining === 0) {
+                autoCounter++;
+            } else {
+                remaining = Math.min(remaining + 1, 500);
+            }
+            updateDisplay();
+        }, remaining === 0 ? 5000 : 4000);
+
+        // Create floating dots
+        for (let i = 0; i < 200; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.style.width = `${Math.random() * 3 + 1}px`;
+            dot.style.height = dot.style.width;
+            dot.style.left = `${Math.random() * 100}%`;
+            dot.style.top = `${Math.random() * 100}%`;
+            dot.style.animation = `float ${Math.random() * 50 + 50}s linear infinite`;
+            dot.style.animationDelay = `${Math.random() * -50}s`;
+            document.body.appendChild(dot);
+        }
+
+        updateDisplay();
+
+        // Add glass effect to squares
+        document.querySelectorAll('.glass-square').forEach(square => {
+            square.addEventListener('click', function() {
+                this.style.transform = 'scale(1.1)';
+                this.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                    this.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                }, 300);
+            });
+        });
+    </script>
+</body>
+
+</html>
